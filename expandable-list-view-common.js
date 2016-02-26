@@ -145,10 +145,34 @@ var ExpandableListView = (function (_super) {
         }
     };
     ExpandableListView.prototype._getDataItemHeader = function (index) {
-        return this.items ? this.items[index] : undefined
+
+        if(this.items){
+            if(this.items.getItem)
+                return this.items.getItem(index)
+            else
+                return this.items[index]
+        }
+
+        return undefined
+
+        //return this.items ? this.items[index] : undefined
     };
     ExpandableListView.prototype._getDataItemChild = function (headerIndex, index) {
-        return this.items ? this.items[headerIndex].getItem(index) : undefined
+
+        if(this.items){
+            if(this.items.getItem){
+                var header = this.items.getItem(headerIndex)
+                if(header.get)
+                    return header.get('item').getItem(index)
+                return header.getItem('index')
+            }
+            else
+                return this.items[headerIndex].getItem(index)
+        }
+
+        return undefined
+
+        //return this.items ? this.items[headerIndex].getItem(index) : undefined
     };
     ExpandableListView.prototype._getDefaultItemHeaderContent = function (index) {
         var lbl = new label.Label();
