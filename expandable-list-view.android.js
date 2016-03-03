@@ -204,7 +204,7 @@ var ExpandableListViewAdapter = (function (_super) {
     }
     
     ExpandableListViewAdapter.prototype.getChild = function(groupPosition, childPosititon) {
-        var dataHeader = this._listView.items[groupPosition];
+        var dataHeader = this._listView.items.getItem ? this._listView.items.getItem(groupPosition) : this._listView.items[groupPosition];
         var dataChild = dataHeader.getItem(childPosititon);
         return dataChild;
     }
@@ -255,12 +255,18 @@ var ExpandableListViewAdapter = (function (_super) {
     }
  
     ExpandableListViewAdapter.prototype.getChildrenCount = function(groupPosition) {
-        var dataHeader = this._listView.items[groupPosition]
+        var dataHeader = this._listView.items.getItem ? this._listView.items.getItem(groupPosition) : this._listView.items[groupPosition]
+        if(!dataHeader)
+            return 0
+
+        if(dataHeader.get)
+            return dataHeader.get('item').getItemsCount()
+
         return dataHeader.getItemsCount()
     }
      
     ExpandableListViewAdapter.prototype.getGroup = function(groupPosition) {
-        return this._listView.items[groupPosition];
+        return this._listView.items.getItem ? this._listView.items.getItem(groupPosition) : this._listView.items[groupPosition];
     }
  
     ExpandableListViewAdapter.prototype.getGroupCount = function() {        
@@ -277,10 +283,13 @@ var ExpandableListViewAdapter = (function (_super) {
             return null;
         }
         var dataHeader = this._listView._getDataItemHeader(groupPosition)
-
         var view = this._listView._getRealizedHeaderView(convertView, groupPosition);
+        
         var args = {
-            eventName: ITEMLOADING, object: this._listView, index: groupPosition, view: view,
+            eventName: ITEMLOADING, 
+            object: this._listView, 
+            index: groupPosition, 
+            view: view,
             android: parent,
             ios: undefined
         };
