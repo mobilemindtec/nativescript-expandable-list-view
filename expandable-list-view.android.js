@@ -4,7 +4,9 @@ var stackLayout = require("ui/layouts/stack-layout");
 var color = require("color");
 var ITEMLOADING = common.ExpandableListView.itemLoadingEvent;
 var LOADMOREITEMS = common.ExpandableListView.loadMoreItemsEvent;
-var ITEMTAP = common.ExpandableListView.itemTapEvent;
+var GROUPEXPAND = common.ExpandableListView.groupExpandEvent;
+var GROUPCOLLAPSE = common.ExpandableListView.groupCollapseEvent;
+var CHILDITEMTAP = common.ExpandableListView.childTapEvent;
 var REALIZED_INDEX = "realizedIndex";
 global.moduleMerge(common, exports);
 function onSeparatorColorPropertyChanged(data) {
@@ -63,12 +65,38 @@ var ExpandableListView = (function (_super) {
         }));
         this.android.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener({
             onItemClick: function (parent, convertView, index, id) {
-                var owner = that.get();
-                if (owner) {
-                    owner.notify({ eventName: ITEMTAP, object: owner, index: index, view: owner._getRealizedView(convertView, index) });
-                }
             }
         }));
+
+        this.android.setOnChildClickListener(new android.widget.ExpandableListView.OnChildClickListener({
+            onChildClick: function(parent, convertView, groupPosition, childPosition, id){
+                var owner = that.get();
+                if (owner) {
+                    owner.notify({ eventName: CHILDITEMTAP, object: owner, groupIndex: groupPosition, childIndex: childPosition, view: owner._getRealizedChildView(convertView, groupPosition, childPosition) });
+                }
+                return true
+            }
+        }))
+
+
+        this.android.setOnGroupCollapseListener(new android.widget.ExpandableListView.OnGroupCollapseListener({
+            onGroupCollapse: function(groupPosition){
+                var owner = that.get();
+                if (owner) {
+                    owner.notify({ eventName: GROUPCOLLAPSE, object: owner, index: groupPosition, view: owner._getRealizedHeaderView(null, groupPosition) });
+                }
+            }
+        }))
+        
+        this.android.setOnGroupExpandListener(new android.widget.ExpandableListView.OnGroupExpandListener({
+            onGroupExpand: function(groupPosition){
+                var owner = that.get();
+                if (owner) {
+                    owner.notify({ eventName: GROUPEXPAND, object: owner, index: groupPosition, view: owner._getRealizedHeaderView(null, groupPosition) });
+                }
+            }
+        }))
+            
     };
     Object.defineProperty(ExpandableListView.prototype, "android", {
         get: function () {
@@ -248,6 +276,8 @@ var ExpandableListViewAdapter = (function (_super) {
         if (!this._listView) {
             return null;
         }
+        var dataHeader = this._listView._getDataItemHeader(groupPosition)
+
         var view = this._listView._getRealizedHeaderView(convertView, groupPosition);
         var args = {
             eventName: ITEMLOADING, object: this._listView, index: groupPosition, view: view,
@@ -281,6 +311,14 @@ var ExpandableListViewAdapter = (function (_super) {
             this._listView._realizedItemsHeader[convertView.hashCode()] = args.view;
             args.view[REALIZED_INDEX] = groupPosition;
         }
+
+
+        if(dataHeader.isExpanded()){
+            // set and disable
+            parent.expandGroup(groupPosition);            
+            dataHeader.setExpanded(false)
+        }
+
         return convertView;
     }
  

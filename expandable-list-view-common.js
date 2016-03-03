@@ -186,7 +186,9 @@ var ExpandableListView = (function (_super) {
     };
     
     ExpandableListView.itemLoadingEvent = "itemLoading";
-    ExpandableListView.itemTapEvent = "itemTap";
+    ExpandableListView.groupExpandEvent = "groupExpand";
+    ExpandableListView.groupCollapseEvent = "groupCollapse";
+    ExpandableListView.childTapEvent = "childTap";
     ExpandableListView.loadMoreItemsEvent = "loadMoreItems";
     ExpandableListView.separatorColorProperty = new dependencyObservable.Property(SEPARATORCOLOR, LISTVIEW, new proxy.PropertyMetadata(undefined));
     ExpandableListView.itemsProperty = new dependencyObservable.Property(ITEMS, LISTVIEW, new proxy.PropertyMetadata(undefined, dependencyObservable.PropertyMetadataSettings.AffectsLayout, onItemsPropertyChanged));    
@@ -210,6 +212,7 @@ var ExpandableListItem = function (args) {
     this.title = args.title
     this.items = args.items || []
     this.tag = args.tag    
+    this.expanded = args.expanded
 
     ExpandableListItem.prototype.getItems = function(){
         return this.items
@@ -230,6 +233,14 @@ var ExpandableListItem = function (args) {
     ExpandableListItem.prototype.getTitle = function(index){
         return this.title
     }
+
+    ExpandableListItem.prototype.isExpanded = function(index){
+        return this.expanded
+    }
+
+    ExpandableListItem.prototype.setExpanded = function(expanded){
+        this.expanded = expanded
+    }    
 
     ExpandableListItem.prototype.addItem = function(item){
         this.items.push(item)
