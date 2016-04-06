@@ -1,0 +1,21 @@
+<Page loaded="loaded" xmlns="http://schemas.nativescript.org/tns.xsd" 
+	xmlns:elv="nativescript-expandable-list-view">
+  <GridLayout rows="*">
+
+    <elv:ExpandableListView id="list-view" items="{{ items }}" row="0" groupCollapse="onGroupCollapse" groupExpand="onGroupExpand" childTap="onChildTap"> 
+
+      <elv:ExpandableListView.itemHeaderTemplate>
+          <Label text="{{ title }}" />
+      </elv:ExpandableListView.itemHeaderTemplate>
+
+      <elv:ExpandableListView.itemChildTemplate>
+          
+          
+            <Label text="{{ title }}" />
+          
+      </elv:ExpandableListView.itemChildTemplate>
+
+    </elv:ExpandableListView>	
+
+  </GridLayout>
+</Page>

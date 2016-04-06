@@ -190,8 +190,7 @@ var ExpandableListView = (function (_super) {
         });
         return lbl;
     };
-    ExpandableListView.prototype._onItemsPropertyChanged = function (data) {
-        console.log("## _onItemsPropertyChanged")
+    ExpandableListView.prototype._onItemsPropertyChanged = function (data) {        
         if (data.oldValue instanceof observable.Observable) {
             weakEvents.removeWeakEventListener(data.oldValue, observableArray.ObservableArray.changeEvent, this._onItemsChanged, this);
         }
