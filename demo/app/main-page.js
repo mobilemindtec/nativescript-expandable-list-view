@@ -19,7 +19,43 @@ var models = [
 				title: 'Sub item A 3'
 			},
 		]
-	}
+	},
+	{
+		id: 2,
+		title: "Item B",
+		items: [
+			{
+				id: 1,
+				title: 'Sub item B 1'
+			},
+			{
+				id: 2,
+				title: 'Sub item B 2'
+			},
+			{
+				id: 3,
+				title: 'Sub item B 3'
+			},
+		]
+	},
+	{
+		id: 3,
+		title: "Item C",
+		items: [
+			{
+				id: 1,
+				title: 'Sub item C 1'
+			},
+			{
+				id: 2,
+				title: 'Sub item C 2'
+			},
+			{
+				id: 3,
+				title: 'Sub item C 3'
+			},
+		]
+	}		
 ]
 
 var viewModel
