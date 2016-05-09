@@ -278,7 +278,7 @@ var UITableViewRowHeightDelegateImpl = (function (_super) {
     UITableViewRowHeightDelegateImpl.prototype.tableViewWillSelectRowAtIndexPath = function (tableView, indexPath) {
         var cell = tableView.cellForRowAtIndexPath(indexPath);
         var owner = this._owner.get();
-        if (owner) {
+        if (owner && indexPath.row > 0) {
             notifyForItemAtIndex(owner, cell, cell.view, CHILDITEMTAP, indexPath);
         }
         return indexPath;
