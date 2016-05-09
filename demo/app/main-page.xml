@@ -2,17 +2,25 @@
 	xmlns:elv="nativescript-expandable-list-view">
   <GridLayout rows="*">
 
-    <elv:ExpandableListView id="list-view" items="{{ items }}" row="0" groupCollapse="onGroupCollapse" groupExpand="onGroupExpand" childTap="onChildTap"> 
+    <elv:ExpandableListView id="list-view" 
+      items="{{ items }}" 
+      row="0" 
+      
+      groupCollapse="onGroupCollapse" 
+      groupExpand="onGroupExpand" 
+      childTap="onChildTap">  
 
       <elv:ExpandableListView.itemHeaderTemplate>
+        <StackLayout cssClass="header">
           <Label text="{{ title }}" />
+        </StackLayout>
       </elv:ExpandableListView.itemHeaderTemplate>
 
       <elv:ExpandableListView.itemChildTemplate>
-          
+          <StackLayout cssClass="child">
           
             <Label text="{{ title }}" />
-          
+          </StackLayout>
       </elv:ExpandableListView.itemChildTemplate>
 
     </elv:ExpandableListView>	

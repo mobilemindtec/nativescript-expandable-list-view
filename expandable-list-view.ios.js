@@ -91,14 +91,11 @@ var DataSource = (function (_super) {
         else
             count = dataHeader.getItemsCount()
 
-        console.log("tableViewNumberOfRowsInSection count = " + count)
-
         return count + 1
     }    
     DataSource.prototype.numberOfSectionsInTableView = function (tableView) {
         var owner = this._owner.get();        
         var count = (owner && owner.items) ? owner.items.length : 0;
-        console.log("numberOfSectionsInTableView count = " + count)
         return count
     };
     DataSource.prototype.tableViewCellForRowAtIndexPath = function (tableView, indexPath) {
@@ -109,14 +106,16 @@ var DataSource = (function (_super) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIER);
         }
 
+
         var owner = this._owner.get();
         if (owner) {
             owner._prepareCellChild(cell, indexPath);
             var cellView = cell.view;
             if (cellView) {
                 var width = utils.layout.getMeasureSpecSize(owner.widthMeasureSpec);
-                var rowHeight = owner._nativeView.rowHeight;
-                var cellHeight = rowHeight > 0 ? rowHeight : owner.getHeight(indexPath.row);
+                var rowHeight = owner._nativeView.rowHeight;                
+
+                var cellHeight = rowHeight > 0 ? rowHeight : owner.getHeightChild(indexPath.section, indexPath.row);
                 view.View.layoutChild(owner, cellView, 0, 0, width, cellHeight);
             }
         }
@@ -147,7 +146,7 @@ var DataSource = (function (_super) {
             if (cellView) {
                 var width = utils.layout.getMeasureSpecSize(owner.widthMeasureSpec);
                 var rowHeight = owner._nativeView.rowHeight;
-                var cellHeight = rowHeight > 0 ? rowHeight : owner.getHeight(indexPath.section);
+                var cellHeight = rowHeight > 0 ? rowHeight : owner.getHeightHeader(indexPath.section);
                 view.View.layoutChild(owner, cellView, 0, 0, width, cellHeight);
             }
         }
@@ -197,12 +196,17 @@ var UITableViewDelegateImpl = (function (_super) {
     };
     UITableViewDelegateImpl.prototype.tableViewHeightForRowAtIndexPath = function (tableView, indexPath) {
         var owner = this._owner.get();
+        
         if (!owner) {
             return 44;
         }
         var height = undefined;
+        var thisIsHeader = indexPath.row == 0
         if (utils.ios.MajorVersion >= 8) {
-            height = owner.getHeight(indexPath.row);
+            if(thisIsHeader)
+                height = owner.getHeightHeader(indexPath.section);
+            else
+                height = owner.getHeightChild(indexPath.section,  indexPath.row);
         }
         if (utils.ios.MajorVersion < 8 || height === undefined) {
             var cell = this._measureCell;
@@ -216,8 +220,12 @@ var UITableViewDelegateImpl = (function (_super) {
                 //this._measureCell = cell
                 cell = this._measureCell;
             }
-            height = owner._prepareCellChild(cell, indexPath);
+            if(thisIsHeader)
+                height = owner._prepareCellHe(cell, indexPath);            
+            else
+                height = owner._prepareCellChild(cell, indexPath);            
         }
+
         return height;
     };
 
@@ -280,8 +288,10 @@ var UITableViewRowHeightDelegateImpl = (function (_super) {
         if (!owner) {
             return DEFAULT_HEIGHT;
         }
+
         return owner.rowHeight;
     };
+
     UITableViewRowHeightDelegateImpl.ObjCProtocols = [UITableViewDelegate];
     return UITableViewRowHeightDelegateImpl;
 }(NSObject));
@@ -313,9 +323,11 @@ var ExpandableListView = (function (_super) {
         this._ios.rowHeight = UITableViewAutomaticDimension;
         this._ios.dataSource = this._dataSource = DataSource.initWithOwner(new WeakRef(this));
         this._ios.delegate = this._delegate = UITableViewDelegateImpl.initWithOwner(new WeakRef(this));        
-        this._heights = new Array();
-        this._map = new Map();        
+        this._heightsHeader = new Array();
+        this._heightsChild = new Array();
+        this._map = new Map();   
     }
+
     ExpandableListView.prototype.onLoaded = function () {
         _super.prototype.onLoaded.call(this);
         if (this._isDataDirty) {
@@ -349,16 +361,26 @@ var ExpandableListView = (function (_super) {
             this._isDataDirty = true;
         }
     };
-    ExpandableListView.prototype.getHeight = function (index) {
-        if(this._heights.length >= index && this._heights.length > 0)
-            return this._heights[index];
-        return DEFAULT_HEIGHT
+    ExpandableListView.prototype.getHeightHeader = function (index) {        
+        var height = this._heightsHeader[index] || DEFAULT_HEIGHT;
+        return height
     };
-    ExpandableListView.prototype.setHeight = function (index, value) {
-        if(this._heights.length >= index && this._heights.length > 0)
-            this._heights[index] = value;
+    ExpandableListView.prototype.getHeightChild = function (headerIndex, index) {
+        if(!this._heightsChild[headerIndex])
+            return DEFAULT_HEIGHT
+
+        return this._heightsChild[headerIndex][index] || DEFAULT_HEIGHT;
+    };
+    ExpandableListView.prototype.setHeightHeader = function (index, value) {
+        this._heightsHeader[index] = value;
+    };
+    ExpandableListView.prototype.setHeightChild = function (headerIndex, index, value) {
+        if(!this._heightsChild[headerIndex])
+            this._heightsChild[headerIndex] = Array()
+        this._heightsChild[headerIndex][index] = value;
     };
     ExpandableListView.prototype._onRowHeightPropertyChanged = function (data) {
+
         if (data.newValue < 0) {
             this._nativeView.rowHeight = UITableViewAutomaticDimension;
             this._nativeView.estimatedRowHeight = DEFAULT_HEIGHT;
@@ -387,18 +409,25 @@ var ExpandableListView = (function (_super) {
             this._ios.reloadData();
         }
     };
-    ExpandableListView.prototype._layoutCell = function (cellView, indexPath) {
+    ExpandableListView.prototype._layoutCellHeader = function (cellView, indexPath) {
         if (cellView) {
             var measuredSize = view.View.measureChild(this, cellView, this.widthMeasureSpec, infinity);
             var height = measuredSize.measuredHeight;
-            this.setHeight(indexPath.row, height);
+            this.setHeightHeader(indexPath.section, height);
+            return height;
+        }
+        return 0;
+    };
+    ExpandableListView.prototype._layoutCellChild = function (cellView, headerIndex, indexPath) {
+        if (cellView) {
+            var measuredSize = view.View.measureChild(this, cellView, this.widthMeasureSpec, infinity);
+            var height = measuredSize.measuredHeight;
+            this.setHeightChild(headerIndex, indexPath.row, height);
             return height;
         }
         return 0;
     };
     ExpandableListView.prototype._prepareCellChild = function (cell, indexPath) {
-
-        console.log("## _prepareCellChild row=" + indexPath.row + ", section=" + indexPath.section)
 
         var cellHeight;
         try {
@@ -430,7 +459,7 @@ var ExpandableListView = (function (_super) {
                 cell.contentView.addSubview(view_1._nativeView);
                 this._addView(view_1);
             }
-            cellHeight = this._layoutCell(view_1, indexPath);
+            cellHeight = this._layoutCellChild(view_1, indexPath.section, indexPath);
         }
         finally {
             this._preparingCell = false;
@@ -438,8 +467,6 @@ var ExpandableListView = (function (_super) {
         return cellHeight;
     };
     ExpandableListView.prototype._prepareCellHeader = function (cell, indexPath) {
-
-        console.log("## _prepareCellHeader row=" + indexPath.row + ", section=" + indexPath.section)
 
         var cellHeight;
         try {
@@ -469,7 +496,7 @@ var ExpandableListView = (function (_super) {
                 cell.contentView.addSubview(view_1._nativeView);
                 this._addView(view_1);
             }
-            cellHeight = this._layoutCell(view_1, indexPath);
+            cellHeight = this._layoutCellHeader(view_1, indexPath);
         }
         finally {
             this._preparingCell = false;
