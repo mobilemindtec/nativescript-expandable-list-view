@@ -104,7 +104,7 @@ var DataSource = (function (_super) {
 
         if (!cell) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIER);
-            cell.backgroundColor = UIColor.clearColor()
+            cell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
         }
 
 
@@ -137,7 +137,7 @@ var DataSource = (function (_super) {
 
         if (!cell) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIERHEADER);
-            cell.backgroundColor = UIColor.clearColor()
+            cell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
         }
 
         var indexPath = NSIndexPath.indexPathForRowInSection(-1, section)
