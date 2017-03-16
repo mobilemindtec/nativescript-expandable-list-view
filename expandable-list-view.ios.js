@@ -104,6 +104,7 @@ var DataSource = (function (_super) {
 
         if (!cell) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIER);
+            cell.backgroundColor = UIColor.clearColor()
         }
 
 
@@ -136,6 +137,7 @@ var DataSource = (function (_super) {
 
         if (!cell) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIERHEADER);
+            cell.backgroundColor = UIColor.clearColor()
         }
 
         var indexPath = NSIndexPath.indexPathForRowInSection(-1, section)
@@ -317,7 +319,7 @@ var ExpandableListView = (function (_super) {
         this._isDataDirty = false;
         this.widthMeasureSpec = 0;
 
-        var mainScreen = utils.ios.getter(UIScreen, UIScreen.mainScreen);        
+        var mainScreen = utils.ios.getter(UIScreen, UIScreen.mainScreen);
         this._ios = NSExpandableTableView.alloc().initWithFrameStyle(mainScreen.bounds, UITableViewStylePlain);
         this._ios.registerClassForCellReuseIdentifier(ListViewCell.class(), CELLIDENTIFIER);
         this._ios.autoresizingMask = UIViewAutoresizing.UIViewAutoresizingNone;
