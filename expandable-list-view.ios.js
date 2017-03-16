@@ -217,13 +217,14 @@ var UITableViewDelegateImpl = (function (_super) {
 
                 if (!this._measureCell) {
                     this._measureCell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CellIdentifier);
+                    this._measureCell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
                 }
 
                 //this._measureCell = cell
                 cell = this._measureCell;
             }
             if(thisIsHeader)
-                height = owner._prepareCellHe(cell, indexPath);
+                height = owner._prepareCellHeader(cell, indexPath);
             else
                 height = owner._prepareCellChild(cell, indexPath);
         }
