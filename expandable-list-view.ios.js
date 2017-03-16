@@ -104,8 +104,8 @@ var DataSource = (function (_super) {
 
         if (!cell) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIER);
-            cell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
         }
+        cell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
 
 
         var owner = this._owner.get();
@@ -137,8 +137,8 @@ var DataSource = (function (_super) {
 
         if (!cell) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIERHEADER);
-            cell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
         }
+        cell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
 
         var indexPath = NSIndexPath.indexPathForRowInSection(-1, section)
         var owner = this._owner.get();
@@ -440,6 +440,7 @@ var ExpandableListView = (function (_super) {
             var view_1 = cell.view;
             if (!view_1) {
                 view_1 = this._getItemChildTemplateContent(indexPath.row - 1);
+                view_1._nativeView.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
             }
             var args = notifyForItemAtIndex(this, cell, view_1, ITEMLOADING, indexPath);
             view_1 = args.view || this._getDefaultItemChildContent(indexPath.row - 1);
@@ -479,6 +480,7 @@ var ExpandableListView = (function (_super) {
             var view_1 = cell.view;
             if (!view_1) {
                 view_1 = this._getItemHeaderTemplateContent(indexPath.section);
+                view_1._nativeView.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
             }
             var args = notifyForItemAtIndex(this, cell, view_1, ITEMLOADING, indexPath);
             view_1 = args.view || this._getDefaultItemHeaderContent(indexPath.section);
