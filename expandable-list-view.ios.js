@@ -26,7 +26,7 @@ var expandableSections = NSMutableIndexSet.alloc().init()
 
 var ListViewCell = (function (_super) {
     __extends(ListViewCell, _super);
-    function ListViewCell() {    
+    function ListViewCell() {
         _super.apply(this, arguments);
     }
     ListViewCell.prototype.willMoveToSuperview = function (newSuperview) {
@@ -43,9 +43,9 @@ var ListViewCell = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    
-    ListViewCell.prototype.initWithStyleReuseIdentifier = function(style, reuseIdentifier){        
-        NSExpandableTableViewControllerHeaderCell.prototype.initWithStyleReuseIdentifier.apply(this, [style, reuseIdentifier])        
+
+    ListViewCell.prototype.initWithStyleReuseIdentifier = function(style, reuseIdentifier){
+        NSExpandableTableViewControllerHeaderCell.prototype.initWithStyleReuseIdentifier.apply(this, [style, reuseIdentifier])
         return this;
     }
 
@@ -56,14 +56,14 @@ var ListViewCell = (function (_super) {
 }(NSExpandableTableViewControllerHeaderCell));
 
 function notifyForItemAtIndex(listView, cell, view, eventName, indexPath) {
-    var args = { 
-        eventName: eventName, 
-        object: listView, 
-        childIndex: indexPath.row - 1, 
-        groupIndex: indexPath.section, 
-        view: view, 
-        ios: cell, 
-        android: undefined 
+    var args = {
+        eventName: eventName,
+        object: listView,
+        childIndex: indexPath.row - 1,
+        groupIndex: indexPath.section,
+        view: view,
+        ios: cell,
+        android: undefined
     };
     listView.notify(args);
     return args;
@@ -83,7 +83,7 @@ var DataSource = (function (_super) {
         var owner = this._owner.get();
         var count
         var dataHeader = owner.items.getItem ? owner.items.getItem(section) : owner.items[section]
-        
+
         if(!dataHeader)
             count = 0
         else if(dataHeader.get)
@@ -92,16 +92,16 @@ var DataSource = (function (_super) {
             count = dataHeader.getItemsCount()
 
         return count + 1
-    }    
+    }
     DataSource.prototype.numberOfSectionsInTableView = function (tableView) {
-        var owner = this._owner.get();        
+        var owner = this._owner.get();
         var count = (owner && owner.items) ? owner.items.length : 0;
         return count
     };
     DataSource.prototype.tableViewCellForRowAtIndexPath = function (tableView, indexPath) {
-        
+
         var cell = tableView.dequeueReusableCellWithIdentifier(CELLIDENTIFIER);
-        
+
         if (!cell) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIER);
         }
@@ -113,7 +113,7 @@ var DataSource = (function (_super) {
             var cellView = cell.view;
             if (cellView) {
                 var width = utils.layout.getMeasureSpecSize(owner.widthMeasureSpec);
-                var rowHeight = owner._nativeView.rowHeight;                
+                var rowHeight = owner._nativeView.rowHeight;
 
                 var cellHeight = rowHeight > 0 ? rowHeight : owner.getHeightChild(indexPath.section, indexPath.row);
                 view.View.layoutChild(owner, cellView, 0, 0, width, cellHeight);
@@ -133,9 +133,9 @@ var DataSource = (function (_super) {
     DataSource.prototype.tableViewExpandingCellForSection = function(tableView, section){
 
         var cell = tableView.dequeueReusableCellWithIdentifier(CELLIDENTIFIERHEADER);
-        
+
         if (!cell) {
-            cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIERHEADER);            
+            cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIERHEADER);
         }
 
         var indexPath = NSIndexPath.indexPathForRowInSection(-1, section)
@@ -184,7 +184,7 @@ var UITableViewDelegateImpl = (function (_super) {
     };
     UITableViewDelegateImpl.prototype.tableViewWillSelectRowAtIndexPath = function (tableView, indexPath) {
         var cell = tableView.cellForRowAtIndexPath(indexPath);
-        var owner = this._owner.get();        
+        var owner = this._owner.get();
         if (owner && indexPath.row > 0) {
             notifyForItemAtIndex(owner, cell, cell.view, CHILDITEMTAP, indexPath);
         }
@@ -196,7 +196,7 @@ var UITableViewDelegateImpl = (function (_super) {
     };
     UITableViewDelegateImpl.prototype.tableViewHeightForRowAtIndexPath = function (tableView, indexPath) {
         var owner = this._owner.get();
-        
+
         if (!owner) {
             return 44;
         }
@@ -212,7 +212,7 @@ var UITableViewDelegateImpl = (function (_super) {
             var cell = this._measureCell;
             if (!cell) {
                 this._measureCell = tableView.dequeueReusableCellWithIdentifier(CELLIDENTIFIER);
-                
+
                 if (!this._measureCell) {
                     this._measureCell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CellIdentifier);
                 }
@@ -221,9 +221,9 @@ var UITableViewDelegateImpl = (function (_super) {
                 cell = this._measureCell;
             }
             if(thisIsHeader)
-                height = owner._prepareCellHe(cell, indexPath);            
+                height = owner._prepareCellHe(cell, indexPath);
             else
-                height = owner._prepareCellChild(cell, indexPath);            
+                height = owner._prepareCellChild(cell, indexPath);
         }
 
         return height;
@@ -231,7 +231,7 @@ var UITableViewDelegateImpl = (function (_super) {
 
     UITableViewDelegateImpl.prototype.tableViewDidSelectRowAtIndexPath = function(tableView, indexPath){
         tableView.deselectRowAtIndexPathAnimated(indexPath, false)
-    }    
+    }
 
     // SLE delegate
     UITableViewDelegateImpl.prototype.tableViewDownloadDataForExpandableSection = function(tableView, section){
@@ -243,14 +243,14 @@ var UITableViewDelegateImpl = (function (_super) {
         expandableSections.removeIndex(section)
     }
 
-    UITableViewDelegateImpl.prototype.tableViewWillExpandSectionAnimated = function(tableView, animated, section){        
-        var owner = this._owner.get();        
+    UITableViewDelegateImpl.prototype.tableViewWillExpandSectionAnimated = function(tableView, animated, section){
+        var owner = this._owner.get();
         var indexPath = NSIndexPath.indexPathForRowInSection(-1, section)
         notifyForItemAtIndex(owner, null, null, GROUPEXPAND, indexPath);
     }
 
-    UITableViewDelegateImpl.prototype.tableViewWillCollapseSectionAnimated = function(tableView, animated, section){        
-        var owner = this._owner.get();        
+    UITableViewDelegateImpl.prototype.tableViewWillCollapseSectionAnimated = function(tableView, animated, section){
+        var owner = this._owner.get();
         var indexPath = NSIndexPath.indexPathForRowInSection(-1, section)
         notifyForItemAtIndex(owner, null, null, GROUPCOLLAPSE, indexPath);
     }
@@ -316,16 +316,18 @@ var ExpandableListView = (function (_super) {
         this._preparingCell = false;
         this._isDataDirty = false;
         this.widthMeasureSpec = 0;
-        this._ios = NSExpandableTableView.alloc().initWithFrameStyle(UIScreen.mainScreen().bounds, UITableViewStylePlain);
+
+        var mainScreen = utils.ios.getter(UIScreen, UIScreen.mainScreen);        
+        this._ios = NSExpandableTableView.alloc().initWithFrameStyle(mainScreen.bounds, UITableViewStylePlain);
         this._ios.registerClassForCellReuseIdentifier(ListViewCell.class(), CELLIDENTIFIER);
         this._ios.autoresizingMask = UIViewAutoresizing.UIViewAutoresizingNone;
         this._ios.estimatedRowHeight = DEFAULT_HEIGHT;
         this._ios.rowHeight = UITableViewAutomaticDimension;
         this._ios.dataSource = this._dataSource = DataSource.initWithOwner(new WeakRef(this));
-        this._ios.delegate = this._delegate = UITableViewDelegateImpl.initWithOwner(new WeakRef(this));        
+        this._ios.delegate = this._delegate = UITableViewDelegateImpl.initWithOwner(new WeakRef(this));
         this._heightsHeader = new Array();
         this._heightsChild = new Array();
-        this._map = new Map();   
+        this._map = new Map();
     }
 
     ExpandableListView.prototype.onLoaded = function () {
@@ -333,7 +335,7 @@ var ExpandableListView = (function (_super) {
         if (this._isDataDirty) {
             this.refresh();
         }
-        this._ios.delegate = this._delegate;        
+        this._ios.delegate = this._delegate;
     };
     ExpandableListView.prototype.onUnloaded = function () {
         this._ios.delegate = null;
@@ -361,7 +363,7 @@ var ExpandableListView = (function (_super) {
             this._isDataDirty = true;
         }
     };
-    ExpandableListView.prototype.getHeightHeader = function (index) {        
+    ExpandableListView.prototype.getHeightHeader = function (index) {
         var height = this._heightsHeader[index] || DEFAULT_HEIGHT;
         return height
     };
@@ -502,7 +504,7 @@ var ExpandableListView = (function (_super) {
             this._preparingCell = false;
         }
         return cellHeight;
-    };    
+    };
     ExpandableListView.prototype._removeContainer = function (cell) {
         this._removeView(cell.view);
         this._map.delete(cell);
