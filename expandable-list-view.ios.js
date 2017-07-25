@@ -4,6 +4,7 @@ var view = require("ui/core/view");
 var stack_layout_1 = require("ui/layouts/stack-layout");
 var proxy_view_container_1 = require("ui/proxy-view-container");
 var color;
+
 function ensureColor() {
     if (!color) {
         color = require("color");
@@ -20,7 +21,9 @@ var CHILDITEMTAP = common.ExpandableListView.childTapEvent;
 
 
 var DEFAULT_HEIGHT = 44;
-global.moduleMerge(common, exports);
+
+require("utils/module-merge").merge(common, exports)
+
 var infinity = utils.layout.makeMeasureSpec(0, utils.layout.UNSPECIFIED);
 var expandableSections = NSMutableIndexSet.alloc().init()
 

@@ -8,31 +8,26 @@ var GROUPEXPAND = common.ExpandableListView.groupExpandEvent;
 var GROUPCOLLAPSE = common.ExpandableListView.groupCollapseEvent;
 var CHILDITEMTAP = common.ExpandableListView.childTapEvent;
 var REALIZED_INDEX = "realizedIndex";
-global.moduleMerge(common, exports);
-function onSeparatorColorPropertyChanged(data) {
-    var bar = data.object;
-    if (!bar.android) {
-        return;
-    }
-    if (data.newValue instanceof color.Color) {
-        bar.android.setDivider(new android.graphics.drawable.ColorDrawable(data.newValue.android));
-        bar.android.setDividerHeight(1);
-    }
-}
-common.ExpandableListView.separatorColorProperty.metadata.onSetNativeValue = onSeparatorColorPropertyChanged;
+
+require("utils/module-merge").merge(common, exports)
+
 var ExpandableListView = (function (_super) {
     __extends(ExpandableListView, _super);
+
     function ExpandableListView() {
         _super.apply(this, arguments);
         this._realizedItemsHeader = {};
         this._realizedItemsChild = {};
     }
-    ExpandableListView.prototype._createUI = function () {
+
+    ExpandableListView.prototype.createNativeView = function () {
         this._android = new android.widget.ExpandableListView(this._context);
         this._android.setCacheColorHint(android.graphics.Color.TRANSPARENT);
+
         if (!this._androidViewId) {
             this._androidViewId = android.view.View.generateViewId();
         }
+
         this._android.setId(this._androidViewId);
         this.android.setAdapter(new ExpandableListViewAdapter(this));
         var that = new WeakRef(this);
@@ -43,11 +38,11 @@ var ExpandableListView = (function (_super) {
                     return;
                 }
                 if (scrollState === android.widget.AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
-                    owner._setValue(common.ExpandableListView.isScrollingProperty, false);
+                    owner._onScrolling(false)
                     owner._notifyScrollIdle();
                 }
                 else {
-                    owner._setValue(common.ExpandableListView.isScrollingProperty, true);
+                    owner._onScrolling(true)
                 }
             },
             onScroll: function (view, firstVisibleItem, visibleItemCount, totalItemCount) {
@@ -63,6 +58,7 @@ var ExpandableListView = (function (_super) {
                 return that.get();
             }
         }));
+
         this.android.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener({
             onItemClick: function (parent, convertView, index, id) {
             }
@@ -87,7 +83,7 @@ var ExpandableListView = (function (_super) {
                 }
             }
         }))
-        
+
         this.android.setOnGroupExpandListener(new android.widget.ExpandableListView.OnGroupExpandListener({
             onGroupExpand: function(groupPosition){
                 var owner = that.get();
@@ -96,8 +92,11 @@ var ExpandableListView = (function (_super) {
                 }
             }
         }))
-            
+
+        this.nativeView = this._android
+        return this.nativeView
     };
+
     Object.defineProperty(ExpandableListView.prototype, "android", {
         get: function () {
             return this._android;
@@ -105,17 +104,40 @@ var ExpandableListView = (function (_super) {
         enumerable: true,
         configurable: true
     });
+
+    Object.defineProperty(ExpandableListView.prototype, "_nativeView", {
+        get: function () {
+            return this._android;
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    ExpandableListView.prototype._onSeparatorColor = function(oldValue, newValue) {
+      var data = {
+        newValue: newValue,
+        oldValue: oldValue
+      }
+
+      if (data.newValue instanceof color.Color) {
+          bar.android.setDivider(new android.graphics.drawable.ColorDrawable(data.newValue.android));
+          bar.android.setDividerHeight(1);
+      }
+    }
+
     ExpandableListView.prototype.refresh = function () {
         if (!this._android || !this._android.getAdapter()) {
             return;
         }
         this.android.getAdapter().notifyDataSetChanged();
     };
+
     ExpandableListView.prototype.scrollToIndex = function (index) {
         if (this._android) {
             this._android.setSelection(index);
         }
     };
+
     ExpandableListView.prototype._onDetached = function (force) {
         _super.prototype._onDetached.call(this, force);
         var keys = Object.keys(this._realizedItemsHeader);
@@ -173,7 +195,7 @@ var ExpandableListView = (function (_super) {
             });
         }
 
-        keys = Object.keys(this._realizedItemsChild);        
+        keys = Object.keys(this._realizedItemsChild);
         length = keys.length;
         for (i = 0; i < length; i++) {
             key = keys[i];
@@ -184,7 +206,7 @@ var ExpandableListView = (function (_super) {
                 index: view[REALIZED_INDEX],
                 view: view
             });
-        }        
+        }
     };
     return ExpandableListView;
 })(common.ExpandableListView);
@@ -199,22 +221,22 @@ var ExpandableListViewAdapter = (function (_super) {
     function ExpandableListViewAdapter(listView) {
         _super.call(this);
         this._listView = listView;
-        this._context = this._listView._context        
+        this._context = this._listView._context
         return global.__native(this);
     }
-    
+
     ExpandableListViewAdapter.prototype.getChild = function(groupPosition, childPosititon) {
         var dataHeader = this._listView.items.getItem ? this._listView.items.getItem(groupPosition) : this._listView.items[groupPosition];
         var dataChild = dataHeader.getItem(childPosititon);
         return dataChild;
     }
- 
+
     ExpandableListViewAdapter.prototype.getChildId = function(groupPosition, childPosition) {
         return childPosition;
     }
-     
+
     ExpandableListViewAdapter.prototype.getChildView = function(groupPosition, childPosition, isLastChild, convertView, parent) {
-                
+
         if (!this._listView) {
             return null;
         }
@@ -253,7 +275,7 @@ var ExpandableListViewAdapter = (function (_super) {
         }
         return convertView;
     }
- 
+
     ExpandableListViewAdapter.prototype.getChildrenCount = function(groupPosition) {
         var dataHeader = this._listView.items.getItem ? this._listView.items.getItem(groupPosition) : this._listView.items[groupPosition]
         if(!dataHeader)
@@ -264,31 +286,31 @@ var ExpandableListViewAdapter = (function (_super) {
 
         return dataHeader.getItemsCount()
     }
-     
+
     ExpandableListViewAdapter.prototype.getGroup = function(groupPosition) {
         return this._listView.items.getItem ? this._listView.items.getItem(groupPosition) : this._listView.items[groupPosition];
     }
- 
-    ExpandableListViewAdapter.prototype.getGroupCount = function() {        
+
+    ExpandableListViewAdapter.prototype.getGroupCount = function() {
         return (this._listView && this._listView.items) ? this._listView.items.length : 0;
     }
-     
+
     ExpandableListViewAdapter.prototype.getGroupId = function(groupPosition) {
         return groupPosition;
     }
- 
+
     ExpandableListViewAdapter.prototype.getGroupView = function(groupPosition, isExpanded, convertView, parent) {
-        
+
         if (!this._listView) {
             return null;
         }
         var dataHeader = this._listView._getDataItemHeader(groupPosition)
         var view = this._listView._getRealizedHeaderView(convertView, groupPosition);
-        
+
         var args = {
-            eventName: ITEMLOADING, 
-            object: this._listView, 
-            index: groupPosition, 
+            eventName: ITEMLOADING,
+            object: this._listView,
+            index: groupPosition,
             view: view,
             android: parent,
             ios: undefined
@@ -324,17 +346,17 @@ var ExpandableListViewAdapter = (function (_super) {
 
         if(dataHeader.isExpanded()){
             // set and disable
-            parent.expandGroup(groupPosition);            
+            parent.expandGroup(groupPosition);
             dataHeader.setExpanded(false)
         }
 
         return convertView;
     }
- 
+
     ExpandableListViewAdapter.prototype.hasStableIds = function() {
         return false;
     }
-     
+
     ExpandableListViewAdapter.prototype.isChildSelectable = function(groupPosition, childPosition) {
         return true;
     }

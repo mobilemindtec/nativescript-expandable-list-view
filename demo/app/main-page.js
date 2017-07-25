@@ -55,22 +55,22 @@ var models = [
 				title: 'Sub item C 3'
 			},
 		]
-	}		
+	}
 ]
 
 var viewModel
 
-exports.loaded = function(args) {
+exports.loaded = (args)  => {
     var page = args.object;
     var items = []
-    
+
     for(var i in models){
 
 		var item = new ExpandableListItem({
 			id: models[i].id,
 			title: models[i].title,
 			tag: models[i]
-		})          
+		})
 
 		for(var j in models[i].items){
 			item.addItem(new ExpandableListItem({
@@ -81,23 +81,23 @@ exports.loaded = function(args) {
 		}
 
 		items.push(item)
-    }    	
+    }
 
-    viewModel = new observableModule.Observable({   
-	  'items': items 
+    viewModel = new observableModule.fromObject({
+	  'items': items
 	})
     page.bindingContext = viewModel
 }
 
-exports.onGroupCollapse = function(){
+exports.onGroupCollapse = () => {
 	console.log("## onGroupCollapse")
 }
 
-exports.onGroupExpand = function(){
+exports.onGroupExpand = () => {
 	console.log("## onGroupExpand")
 }
 
-exports.onChildTap = function(args){
+exports.onChildTap = (args) => {
 
 	var groupItem = viewModel.get('items')[args.groupIndex]
 	var childItem = groupItem.items[args.childIndex]
