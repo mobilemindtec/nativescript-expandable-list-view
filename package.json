@@ -1,5 +1,5 @@
 { "name" : "nativescript-expandable-list-view",
-  "main" : "expandable-list-view.js",
+  "main" : "index.js",
   "version": "0.0.1",
   "nativescript": {
     "platforms": {
