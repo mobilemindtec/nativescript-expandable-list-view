@@ -1,5 +1,6 @@
+
 var observableModule = require("data/observable");
-var ExpandableListItem = require("nativescript-expandable-list-view").ExpandableListItem;
+var ExpandableListItem = require("./nativescript-expandable-list-view").ExpandableListItem;
 
 var models = [
 	{
@@ -60,32 +61,33 @@ var models = [
 
 var viewModel
 
-exports.loaded = (args)  => {
+exports.loaded = function(args) {
     var page = args.object;
     var items = []
 
     for(var i in models){
 
-		var item = new ExpandableListItem({
-			id: models[i].id,
-			title: models[i].title,
-			tag: models[i]
-		})
+			var item = new ExpandableListItem({
+				id: models[i].id,
+				title: models[i].title,
+				tag: models[i]
+			})
 
-		for(var j in models[i].items){
-			item.addItem(new ExpandableListItem({
-				id: models[i].items[j].id,
-				title: models[i].items[j].title,
-				tag: models[i].items[j]
-			}))
-		}
+			for(var j in models[i].items){
+				item.addItem(new ExpandableListItem({
+					id: models[i].items[j].id,
+					title: models[i].items[j].title,
+					tag: models[i].items[j]
+				}))
+			}
 
-		items.push(item)
+			items.push(item)
+
     }
 
     viewModel = new observableModule.fromObject({
-	  'items': items
-	})
+	  	'items': items
+		})
     page.bindingContext = viewModel
 }
 

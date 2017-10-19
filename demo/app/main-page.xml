@@ -1,11 +1,10 @@
 <Page loaded="loaded" xmlns="http://schemas.nativescript.org/tns.xsd"
-	xmlns:elv="nativescript-expandable-list-view">
+	xmlns:elv="~/nativescript-expandable-list-view">
   <GridLayout rows="*">
 
     <elv:ExpandableListView id="list-view"
       items="{{ items }}"
-      row="0"
-
+      row="0"      
       groupCollapse="onGroupCollapse"
       groupExpand="onGroupExpand"
       childTap="onChildTap">
