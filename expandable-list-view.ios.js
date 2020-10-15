@@ -109,7 +109,7 @@ var DataSource = (function (_super) {
         if (!cell) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIER);
         }
-        cell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
+        cell.backgroundColor = UIColor.clearColor
 
 
         var owner = this._owner.get();
@@ -142,7 +142,7 @@ var DataSource = (function (_super) {
         if (!cell) {
             cell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CELLIDENTIFIERHEADER);
         }
-        cell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
+        cell.backgroundColor = UIColor.clearColor
 
         var indexPath = NSIndexPath.indexPathForRowInSection(-1, section)
         var owner = this._owner.get();
@@ -221,7 +221,7 @@ var UITableViewDelegateImpl = (function (_super) {
 
                 if (!this._measureCell) {
                     this._measureCell = new ListViewCell().initWithStyleReuseIdentifier(UITableViewCellStyleValue1, CellIdentifier);
-                    this._measureCell.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
+                    this._measureCell.backgroundColor = UIColor.clearColor
                 }
 
                 //this._measureCell = cell
@@ -319,7 +319,7 @@ var ExpandableListView = (function (_super) {
     }
 
     ExpandableListView.prototype.createNativeView  = function(){
-        var mainScreen = utils.ios.getter(UIScreen, UIScreen.mainScreen);
+        var mainScreen = UIScreen.mainScreen
         
         this.nativeView = this._ios = NSExpandableTableView.alloc().initWithFrameStyle(mainScreen.bounds, UITableViewStylePlain);
 
@@ -476,7 +476,7 @@ var ExpandableListView = (function (_super) {
             var view_1 = cell.view;
             if (!view_1) {
                 view_1 = this._getItemChildTemplateContent(indexPath.row - 1);
-                view_1.nativeView.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
+                view_1.nativeView.backgroundColor = UIColor.clearColor
             }
             var args = notifyForItemAtIndex(this, cell, view_1, ITEMLOADING, indexPath);
             view_1 = args.view || this._getDefaultItemChildContent(indexPath.row - 1);
@@ -515,7 +515,7 @@ var ExpandableListView = (function (_super) {
             var view_1 = cell.view;
             if (!view_1) {
                 view_1 = this._getItemHeaderTemplateContent(indexPath.section);
-                view_1.nativeView.backgroundColor = utils.ios.getter(UIColor, UIColor.clearColor)
+                view_1.nativeView.backgroundColor = UIColor.clearColor
             }
             var args = notifyForItemAtIndex(this, cell, view_1, ITEMLOADING, indexPath);
             view_1 = args.view || this._getDefaultItemHeaderContent(indexPath.section);
