@@ -1,10 +1,38 @@
-{ "name" : "nativescript-expandable-list-view",
-  "main" : "index.js",
-  "version": "0.0.1",
+{
+  "_args": [
+    [
+      "git+https://github.com/mobilemindtec/nativescript-expandable-list-view.git",
+      "/Volumes/Data/sources/repositories/amo/app/amo"
+    ]
+  ],
+  "_from": "git+https://github.com/mobilemindtec/nativescript-expandable-list-view.git",
+  "_id": "nativescript-expandable-list-view@git+https://github.com/mobilemindtec/nativescript-expandable-list-view.git#90aa9010d3ec82e3532fae2084e50a0a6a8d5e0f",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/nativescript-expandable-list-view",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "git+https://github.com/mobilemindtec/nativescript-expandable-list-view.git",
+    "rawSpec": "git+https://github.com/mobilemindtec/nativescript-expandable-list-view.git",
+    "saveSpec": "git+https://github.com/mobilemindtec/nativescript-expandable-list-view.git",
+    "fetchSpec": "https://github.com/mobilemindtec/nativescript-expandable-list-view.git",
+    "gitCommittish": null
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git+https://github.com/mobilemindtec/nativescript-expandable-list-view.git#90aa9010d3ec82e3532fae2084e50a0a6a8d5e0f",
+  "_spec": "git+https://github.com/mobilemindtec/nativescript-expandable-list-view.git",
+  "_where": "/Volumes/Data/sources/repositories/amo/app/amo",
+  "description": "./demo -> demo app",
+  "main": "index.js",
+  "name": "nativescript-expandable-list-view",
   "nativescript": {
     "platforms": {
       "ios": "3.0.0",
       "android": "3.0.0"
     }
-  }
+  },
+  "version": "0.0.1"
 }

@@ -1,11 +1,10 @@
-var observable = require("data/observable");
-var observableArray = require("data/observable-array");
-var view = require("ui/core/view");
-var builder = require("ui/builder");
-var label = require("ui/label");
-var color = require("color");
+import {Observable, ObservableArray, Property} from "@nativescript/core";
+import {Builder} from "@nativescript/core/ui/builder";
+var view = require("@nativescript/core/ui/core/view");
+var label = require("@nativescript/core/ui/label");
+var color = require("@nativescript/core/color");
 var weakEvents = require("ui/core/weak-event-listener");
-var utils = require("utils/utils");
+var utils = require("@nativescript/core/utils");
 var ITEMS = "items";
 var ITEMHEADERTEMPLATE = "itemHeaderTemplate";
 var ITEMCHILDTEMPLATE = "itemChildTemplate";
@@ -15,129 +14,149 @@ var SEPARATORCOLOR = "separatorColor";
 var ROWHEIGHT = "rowHeight";
 var knownTemplates;
 
-(function (knownTemplates) {
-    knownTemplates.itemHeaderTemplate = "itemHeaderTemplate";
-    knownTemplates.itemChildTemplate = "itemChildTemplate";
-})(knownTemplates = exports.knownTemplates || (exports.knownTemplates = {}));
 
-var ExpandableListItem = function (args) {
+Builder.knownTemplates.add("itemHeaderTemplate")
+Builder.knownTemplates.add("itemChildTemplate")
+
+export class ExpandableListItem {
 
     // listDataHeader: header titles
     // listDataChild: child data in format of header title, child title
 
-    this.id = args.id
-    this.title = args.title
-    this.items = args.items || []
-    this.tag = args.tag
-    this.expanded = args.expanded
+    constructor(args){
+        this.id = args.id
+        this.title = args.title
+        this.items = args.items || []
+        this.tag = args.tag
+        this.expanded = args.expanded        
+    }
 
-    ExpandableListItem.prototype.getItems = function(){
+    getItems(){
         return this.items
     }
 
-    ExpandableListItem.prototype.getItemsCount = function(){
+    getItemsCount(){
         return this.items.length
     }
 
-    ExpandableListItem.prototype.getItem = function(index){
+    getItem(index){
         return this.items[index]
     }
 
-    ExpandableListItem.prototype.getId = function(index){
+    getId(index){
         return this.id
     }
 
-    ExpandableListItem.prototype.getTitle = function(index){
+    getTitle(index){
         return this.title
     }
 
-    ExpandableListItem.prototype.isExpanded = function(index){
+    isExpanded(index){
         return this.expanded
     }
 
-    ExpandableListItem.prototype.setExpanded = function(expanded){
+    setExpanded(expanded){
         this.expanded = expanded
     }
 
-    ExpandableListItem.prototype.addItem = function(item){
+    addItem(item){
         this.items.push(item)
     }
 
-    ExpandableListItem.prototype.makeAndAddItem = function(args){
+    makeAndAddItem(args){
         this.addItem(new ExpandableListItem(args))
     }
 
-    ExpandableListItem.prototype.getTag = function(args){
+    getTag(args){
         return this.tag
     }
 }
 
-var ExpandableListView = (function (_super) {
-    __extends(ExpandableListView, _super);
-    function ExpandableListView() {
-        _super.apply(this, arguments);
+export class ExpandableListView extends view.View{
+
+
+    constructor(){
+        super(...arguments);
+        this._defaultItemHeaderTemplate = {
+            key: 'default',
+            createView: () => {
+                if (this.itemHeaderTemplate) {
+                    return Builder.parse(this.itemHeaderTemplate, this);
+                }
+                return undefined;
+            },
+        };
+
+        this.defaultItemChildTemplate = {
+            key: 'default',
+            createView: () => {
+                if (this.itemChildTemplate) {
+                    return Builder.parse(this.itemChildTemplate, this);
+                }
+                return undefined;
+            },
+        };
     }
 
-
-    ExpandableListView.prototype._onScrolling = function(value){
+    _onScrolling(value){
         this._onScrollingPropertyChanged(false, value)
     }
 
-    ExpandableListView.prototype._onScrollingPropertyChanged = function(oldValue, newValue){
+    _onScrollingPropertyChanged(oldValue, newValue){
 
     }
 
-    ExpandableListView.prototype._onItemHeaderTemplatePropertyChanged = function(oldValue, newValue) {
+    _onItemHeaderTemplatePropertyChanged(oldValue, newValue) {
         this.refresh();
     }
 
-    ExpandableListView.prototype._onItemChildTemplatePropertyChanged = function(oldValue, newValue) {
+    _onItemChildTemplatePropertyChanged(oldValue, newValue) {
         this.refresh();
     }
 
-    ExpandableListView.prototype.refresh = function () {
+    refresh () {
     }
 
-    ExpandableListView.prototype.scrollToIndex = function (index) {
+    scrollToIndex (index) {
     }
 
-    ExpandableListView.prototype._getItemHeaderTemplateContent = function (index) {
+    _getItemHeaderTemplateContent (index) {
         var v;
         if (this.itemHeaderTemplate && this.items) {
-            v = builder.parse(this.itemHeaderTemplate, this);
+            v = this._defaultItemHeaderTemplate
         }
         return v;
     };
 
-    ExpandableListView.prototype._getItemChildTemplateContent = function (index) {
+    _getItemChildTemplateContent (index) {
         var v;
         if (this.itemChildTemplate && this.items) {
-            v = builder.parse(this.itemChildTemplate, this);
+            v = this.defaultItemChildTemplate
         }
         return v;
     };
 
-    ExpandableListView.prototype._prepareItemHeader = function (item, index) {
+    _prepareItemHeader (item, index) {
         if (item) {
             var dataItem = this._getDataItemHeader(index);
-            if (!(dataItem instanceof observable.Observable)) {
+            if (!(dataItem instanceof Observable)) {
                 item.bindingContext = null;
             }
             item.bindingContext = dataItem;
         }
     };
 
-    ExpandableListView.prototype._prepareItemChild = function (item, headerIndex, index) {
+    _prepareItemChild (item, headerIndex, index) {
         if (item) {
             var dataItem = this._getDataItemChild(headerIndex, index);
-            if (!(dataItem instanceof observable.Observable)) {
+            if (!(dataItem instanceof Observable)) {
                 item.bindingContext = null;
             }
             item.bindingContext = dataItem;
         }
     };
 
-    ExpandableListView.prototype._getDataItemHeader = function (index) {
+    _getDataItemHeader (index) {
 
         if(this.items){
             if(this.items.getItem)
@@ -150,7 +169,7 @@ var ExpandableListView = (function (_super) {
 
     };
 
-    ExpandableListView.prototype._getDataItemChild = function (headerIndex, index) {
+    _getDataItemChild (headerIndex, index) {
 
         if(this.items){
             if(this.items.getItem){
@@ -167,7 +186,7 @@ var ExpandableListView = (function (_super) {
 
     };
 
-    ExpandableListView.prototype._getDefaultItemHeaderContent = function (index) {
+    _getDefaultItemHeaderContent (index) {
         var lbl = new label.Label();
         lbl.bind({
             targetProperty: "text",
@@ -176,7 +195,7 @@ var ExpandableListView = (function (_super) {
         return lbl;
     };
 
-    ExpandableListView.prototype._getDefaultItemChildContent = function (index) {
+    _getDefaultItemChildContent (index) {
         var lbl = new label.Label();
         lbl.bind({
             targetProperty: "text",
@@ -185,81 +204,79 @@ var ExpandableListView = (function (_super) {
         return lbl;
     };
 
-    ExpandableListView.prototype._onItemsPropertyChanged = function (oldValue, newValue) {
+    _onItemsPropertyChanged (oldValue, newValue) {
 
         var data = {
             oldValue: oldValue, 
             newValue: newValue
         }
 
-        if (data.oldValue instanceof observable.Observable) {
-            weakEvents.removeWeakEventListener(data.oldValue, observableArray.ObservableArray.changeEvent, this._onItemsChanged, this);
+        if (data.oldValue instanceof Observable) {
+            weakEvents.removeWeakEventListener(data.oldValue, ObservableArray.changeEvent, this._onItemsChanged, this);
         }
 
-        if (data.newValue instanceof observable.Observable) {
-            weakEvents.addWeakEventListener(data.newValue, observableArray.ObservableArray.changeEvent, this._onItemsChanged, this);
+        if (data.newValue instanceof Observable) {
+            weakEvents.addWeakEventListener(data.newValue, ObservableArray.changeEvent, this._onItemsChanged, this);
         }
 
         this.refresh();
     };
 
-    ExpandableListView.prototype._onItemsChanged = function (args) {
+    _onItemsChanged (args) {
         this.refresh();
     };
 
-    ExpandableListView.prototype._onRowHeightPropertyChanged = function (oldValue, newValue) {
+    _onRowHeightPropertyChanged (oldValue, newValue) {
         this.refresh();
     };
 
-    ExpandableListView.prototype._propagateInheritableProperties = function (view) {
+    _propagateInheritableProperties (view) {
     };
 
-    ExpandableListView.itemLoadingEvent = "itemLoading";
-    ExpandableListView.groupExpandEvent = "groupExpand";
-    ExpandableListView.groupCollapseEvent = "groupCollapse";
-    ExpandableListView.childTapEvent = "childTap";
-    ExpandableListView.loadMoreItemsEvent = "loadMoreItems";
+}
 
-    return ExpandableListView;
+ExpandableListView.itemLoadingEvent = "itemLoading";
+ExpandableListView.groupExpandEvent = "groupExpand";
+ExpandableListView.groupCollapseEvent = "groupCollapse";
+ExpandableListView.childTapEvent = "childTap";
+ExpandableListView.loadMoreItemsEvent = "loadMoreItems";
 
-})(view.View);
-
-exports.separatorColorProperty = new view.Property({
+exports.separatorColorProperty = new Property({
     name: "separatorColor",
     valueChanged: function (target, oldValue, newValue) {
         target._onDrawerContentPropertyChanged(oldValue, newValue)
     }
 });
 
-exports.itemsProperty = new view.Property({
+exports.itemsProperty = new Property({
     name: "items",
     valueChanged: function (target, oldValue, newValue) {
         target._onItemsPropertyChanged(oldValue, newValue)
     }
 });
 
-exports.itemHeaderTemplateProperty = new view.Property({
+exports.itemHeaderTemplateProperty = new Property({
     name: "itemHeaderTemplate",
     valueChanged: function (target, oldValue, newValue) {
         target._onItemHeaderTemplatePropertyChanged(oldValue, newValue)
     }
 });
 
-exports.itemChildTemplateProperty = new view.Property({
+exports.itemChildTemplateProperty = new Property({
     name: "itemChildTemplate",
     valueChanged: function (target, oldValue, newValue) {
         target._onItemChildTemplatePropertyChanged(oldValue, newValue)
     }
 });
 
-exports.isScrollingProperty = new view.Property({
+exports.isScrollingProperty = new Property({
     name: "isScrolling",
     valueChanged: function (target, oldValue, newValue) {
         target._onScrollingPropertyChanged(oldValue, newValue)
     }
 });
 
-exports.rowHeightProperty = new view.Property({
+exports.rowHeightProperty = new Property({
     name: "rowHeight",
     defaultValue: 0,
     valueChanged: function (target, oldValue, newValue) {
@@ -278,6 +295,3 @@ exports.itemHeaderTemplateProperty.register(ExpandableListView);
 exports.itemChildTemplateProperty.register(ExpandableListView);
 exports.isScrollingProperty.register(ExpandableListView);
 exports.rowHeightProperty.register(ExpandableListView);
-
-exports.ExpandableListView = ExpandableListView;
-exports.ExpandableListItem = ExpandableListItem;

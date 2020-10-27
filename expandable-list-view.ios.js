@@ -1,8 +1,8 @@
 var common = require("./expandable-list-view-common");
-var utils = require("utils/utils");
-var view = require("ui/core/view");
-var stack_layout_1 = require("ui/layouts/stack-layout");
-var proxy_view_container_1 = require("ui/proxy-view-container");
+var utils = require("@nativescript/core/utils");
+var view = require("@nativescript/core/ui/core/view");
+var stack_layout_1 = require("@nativescript/core/ui/layouts/stack-layout");
+var proxy_view_container_1 = require("@nativescript/core/ui/proxy-view-container");
 var color;
 
 function ensureColor() {
@@ -22,15 +22,15 @@ var CHILDITEMTAP = common.ExpandableListView.childTapEvent;
 
 var DEFAULT_HEIGHT = 44;
 
-require("utils/module-merge").merge(common, exports)
+export * from "./expandable-list-view-common"
 
 var infinity = utils.layout.makeMeasureSpec(0, utils.layout.UNSPECIFIED);
 var expandableSections = NSMutableIndexSet.alloc().init()
 
 var ListViewCell = (function (_super) {
     __extends(ListViewCell, _super);
-    function ListViewCell() {        
-        _super.apply(this, arguments);        
+    function ListViewCell() {                
+        return _super.call(this, arguments) || this;
     }
     ListViewCell.prototype.willMoveToSuperview = function (newSuperview) {
         var parent = (this.view ? this.view.parent : null);
@@ -75,7 +75,7 @@ function notifyForItemAtIndex(listView, cell, view, eventName, indexPath) {
 var DataSource = (function (_super) {
     __extends(DataSource, _super);
     function DataSource() {        
-        _super.apply(this, arguments);
+        return _super.call(this, arguments) || this;
     }
     DataSource.initWithOwner = function (owner) {
         var dataSource = DataSource.new();
@@ -175,7 +175,7 @@ var DataSource = (function (_super) {
 var UITableViewDelegateImpl = (function (_super) {
     __extends(UITableViewDelegateImpl, _super);
     function UITableViewDelegateImpl() {        
-        _super.apply(this, arguments);
+        return _super.call(this, arguments) || this;
     }
     UITableViewDelegateImpl.initWithOwner = function (owner) {
         var delegate = UITableViewDelegateImpl.new();
@@ -208,13 +208,13 @@ var UITableViewDelegateImpl = (function (_super) {
         }
         var height = undefined;
         var thisIsHeader = indexPath.row == 0
-        if (utils.ios.MajorVersion >= 8) {
+        if (utils.iOSNativeHelper.MajorVersion >= 8) {
             if(thisIsHeader)
                 height = owner.getHeightHeader(indexPath.section);
             else
                 height = owner.getHeightChild(indexPath.section,  indexPath.row);
         }
-        if (utils.ios.MajorVersion < 8 || height === undefined) {
+        if (utils.iOSNativeHelper.MajorVersion < 8 || height === undefined) {
             var cell = this._measureCell;
             if (!cell) {
                 this._measureCell = tableView.dequeueReusableCellWithIdentifier(CELLIDENTIFIER);
@@ -269,7 +269,7 @@ var UITableViewDelegateImpl = (function (_super) {
 var UITableViewRowHeightDelegateImpl = (function (_super) {
     __extends(UITableViewRowHeightDelegateImpl, _super);
     function UITableViewRowHeightDelegateImpl() {        
-        _super.apply(this, arguments);
+        return _super.call(this, arguments) || this;
     }
     UITableViewRowHeightDelegateImpl.initWithOwner = function (owner) {
         var delegate = UITableViewRowHeightDelegateImpl.new();
@@ -303,23 +303,21 @@ var UITableViewRowHeightDelegateImpl = (function (_super) {
     return UITableViewRowHeightDelegateImpl;
 }(NSObject));
 
-var ExpandableListView = (function (_super) {
-    __extends(ExpandableListView, _super);
-    function ExpandableListView() {
-        _super.call(this);
-        
+export class ExpandableListView extends common.ExpandableListView{
+    
+    constructor() {
+        super()        
         this._preparingCell = false;
         this._isDataDirty = false;
         this.widthMeasureSpec = 0;
 
         this._heightsHeader = new Array();
         this._heightsChild = new Array();
-        this._map = new Map();
-        return this
+        this._map = new Map();        
     }
 
-    ExpandableListView.prototype.createNativeView  = function(){
-        var mainScreen = UIScreen.mainScreen
+    createNativeView(){
+        var mainScreen = UIScreen.mainScreen;
         
         this.nativeView = this._ios = NSExpandableTableView.alloc().initWithFrameStyle(mainScreen.bounds, UITableViewStylePlain);
 
@@ -332,45 +330,27 @@ var ExpandableListView = (function (_super) {
         return this.nativeView   
     }
 
-    ExpandableListView.prototype.onLoaded = function () {
-        _super.prototype.onLoaded.call(this);
+    onLoaded() {
+        super.onLoaded()
         if (this._isDataDirty) {
             this.refresh();
         }
         this._ios.delegate = this._delegate;
-    };
-    ExpandableListView.prototype.onUnloaded = function () {
-        this._ios.delegate = null;
-        _super.prototype.onUnloaded.call(this);
-    };
-    Object.defineProperty(ExpandableListView.prototype, "ios", {
-        get: function () {
-            return this._ios;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(ExpandableListView.prototype, "_nativeView", {
-        get: function () {
-            return this._ios;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(ExpandableListView.prototype, "_childrenCount", {
-        get: function () {
-            return this.items.length;
-        },
-        enumerable: true,
-        configurable: true
-    });
+    }
 
-    ExpandableListView.prototype.scrollToIndex = function (index) {
+    onUnloaded() {
+        this._ios.delegate = null;
+        super.onUnloaded()
+    }
+
+
+    scrollToIndex(index) {
         if (this._ios) {
             this._ios.scrollToRowAtIndexPathAtScrollPositionAnimated(NSIndexPath.indexPathForItemInSection(index, 0), UITableViewScrollPosition.UITableViewScrollPositionTop, false);
         }
-    };
-    ExpandableListView.prototype.refresh = function () {
+    }
+
+    refresh() {
         this._map.forEach(function (view, nativeView, map) {
             if (!(view.bindingContext instanceof common.Observable)) {
                 view.bindingContext = null;
@@ -385,26 +365,31 @@ var ExpandableListView = (function (_super) {
             this._isDataDirty = true;
         }
 
-    };
-    ExpandableListView.prototype.getHeightHeader = function (index) {        
+    }
+
+    getHeightHeader(index) {        
         var height = this._heightsHeader[index] || DEFAULT_HEIGHT;
         return height
-    };
-    ExpandableListView.prototype.getHeightChild = function (headerIndex, index) {
+    }
+
+    getHeightChild(headerIndex, index) {
         if(!this._heightsChild[headerIndex])
             return DEFAULT_HEIGHT
 
         return this._heightsChild[headerIndex][index] || DEFAULT_HEIGHT;
-    };
-    ExpandableListView.prototype.setHeightHeader = function (index, value) {
+    }
+
+    setHeightHeader(index, value) {
         this._heightsHeader[index] = value;
-    };
-    ExpandableListView.prototype.setHeightChild = function (headerIndex, index, value) {
+    }
+
+    setHeightChild(headerIndex, index, value) {
         if(!this._heightsChild[headerIndex])
             this._heightsChild[headerIndex] = Array()
         this._heightsChild[headerIndex][index] = value;
-    };
-    ExpandableListView.prototype._onRowHeightPropertyChanged = function (oldValue, newValue) {
+    }
+
+    _onRowHeightPropertyChanged(oldValue, newValue) {
 
         var value = this._effectiveRowHeight;
 
@@ -426,22 +411,25 @@ var ExpandableListView = (function (_super) {
         if (this.isLoaded) {
             this._nativeView.delegate = this._delegate;
         }
-        _super.prototype._onRowHeightPropertyChanged.call(this, oldValue, newValue);
-    };
-    ExpandableListView.prototype.requestLayout = function () {
+        super._onRowHeightPropertyChanged(oldValue, newValue);
+    }
+
+    requestLayout() {
         if (!this._preparingCell) {
-            _super.prototype.requestLayout.call(this);
+            super.requestLayout()
         }
-    };
-    ExpandableListView.prototype.measure = function (widthMeasureSpec, heightMeasureSpec) {
+    }
+
+    measure(widthMeasureSpec, heightMeasureSpec) {
         this.widthMeasureSpec = widthMeasureSpec;
         var changed = this._setCurrentMeasureSpecs(widthMeasureSpec, heightMeasureSpec);
-        _super.prototype.measure.call(this, widthMeasureSpec, heightMeasureSpec);
+        super.measure(widthMeasureSpec, heightMeasureSpec);
         if (changed) {
             this._ios.reloadData();
         }
-    };
-    ExpandableListView.prototype._layoutCellHeader = function (cellView, indexPath) {
+    }
+
+    _layoutCellHeader(cellView, indexPath) {
         if (cellView) {
             var rowHeight = this._effectiveRowHeight;
             var heightMeasureSpec = rowHeight >= 0 ? utils.layout.makeMeasureSpec(rowHeight, utils.layout.EXACTLY) : infinity;
@@ -453,8 +441,9 @@ var ExpandableListView = (function (_super) {
             return height;
         }
         return utils.layout.toDevicePixels(DEFAULT_HEIGHT);
-    };
-    ExpandableListView.prototype._layoutCellChild = function (cellView, headerIndex, indexPath) {
+    }
+
+    _layoutCellChild(cellView, headerIndex, indexPath) {
         if (cellView) {
 
             var rowHeight = this._effectiveRowHeight 
@@ -468,18 +457,18 @@ var ExpandableListView = (function (_super) {
             return height;
         }
         return utils.layout.toDevicePixels(DEFAULT_HEIGHT);
-    };
-    ExpandableListView.prototype._prepareCellChild = function (cell, indexPath) {
+    }
+
+    _prepareCellChild(cell, indexPath) {
         var cellHeight;
         try {
             this._preparingCell = true;
             var view_1 = cell.view;
             if (!view_1) {
-                view_1 = this._getItemChildTemplateContent(indexPath.row - 1);
-                view_1.nativeView.backgroundColor = UIColor.clearColor
+                view_1 = this._getItemChildTemplateContent(indexPath.row - 1).createView();                
             }
             var args = notifyForItemAtIndex(this, cell, view_1, ITEMLOADING, indexPath);
-            view_1 = args.view || this._getDefaultItemChildContent(indexPath.row - 1);
+            view_1 = args.view || this._getDefaultItemChildContent(indexPath.row - 1).createView();
             if (view_1 instanceof proxy_view_container_1.ProxyViewContainer) {
                 var sp = new stack_layout_1.StackLayout();
                 sp.addChild(view_1);
@@ -490,16 +479,17 @@ var ExpandableListView = (function (_super) {
             }
             else if (cell.view !== view_1) {
                 this._removeContainer(cell);
-                cell.view.nativeView.removeFromSuperview();
+                cell.view.nativeViewProtected.removeFromSuperview();
                 cell.owner = new WeakRef(view_1);
             }
             //var path = this._ios.indexPathForCell(cell);
             //var headerIndex = indexPath.section;
             this._prepareItemChild(view_1, indexPath.section, indexPath.row - 1);
             this._map.set(cell, view_1);
-            if (view_1 && !view_1.parent && view_1.nativeView) {
-                cell.contentView.addSubview(view_1.nativeView);
+            if (view_1 && !view_1.parent) {
                 this._addView(view_1);
+                cell.contentView.addSubview(view_1.nativeViewProtected);  
+                view_1.nativeViewProtected.backgroundColor = UIColor.clearColor              
             }
             cellHeight = this._layoutCellChild(view_1, indexPath.section, indexPath);
         }
@@ -507,18 +497,18 @@ var ExpandableListView = (function (_super) {
             this._preparingCell = false;
         }
         return cellHeight;
-    };
-    ExpandableListView.prototype._prepareCellHeader = function (cell, indexPath) {
+    }
+
+    _prepareCellHeader(cell, indexPath) {
         var cellHeight;
         try {
             this._preparingCell = true;
             var view_1 = cell.view;
             if (!view_1) {
-                view_1 = this._getItemHeaderTemplateContent(indexPath.section);
-                view_1.nativeView.backgroundColor = UIColor.clearColor
+                view_1 = this._getItemHeaderTemplateContent(indexPath.section).createView();
             }
             var args = notifyForItemAtIndex(this, cell, view_1, ITEMLOADING, indexPath);
-            view_1 = args.view || this._getDefaultItemHeaderContent(indexPath.section);
+            view_1 = args.view || this._getDefaultItemHeaderContent(indexPath.section).createView();
             if (view_1 instanceof proxy_view_container_1.ProxyViewContainer) {
                 var sp = new stack_layout_1.StackLayout();
                 sp.addChild(view_1);
@@ -529,14 +519,15 @@ var ExpandableListView = (function (_super) {
             }
             else if (cell.view !== view_1) {
                 this._removeContainer(cell);
-                cell.view.nativeView.removeFromSuperview();
+                cell.view.nativeViewProtected.removeFromSuperview();
                 cell.owner = new WeakRef(view_1);
             }
             this._prepareItemHeader(view_1, indexPath.section);
             this._map.set(cell, view_1);
-            if (view_1 && !view_1.parent && view_1.nativeView) {
-                cell.contentView.addSubview(view_1.nativeView);
+            if (view_1 && !view_1.parent) {
                 this._addView(view_1);
+                cell.contentView.addSubview(view_1.nativeViewProtected);   
+                view_1.nativeViewProtected.backgroundColor = UIColor.clearColor             
             }
             cellHeight = this._layoutCellHeader(view_1, indexPath);
         }
@@ -544,16 +535,39 @@ var ExpandableListView = (function (_super) {
             this._preparingCell = false;
         }
         return cellHeight;
-    };
-    ExpandableListView.prototype._removeContainer = function (cell) {
+    }
+
+    _removeContainer(cell) {
         var view = cell.view;
         if (!(view.parent instanceof ExpandableListView)) {
             this._removeView(view.parent);
         }
         view.parent._removeView(view);
         this._map.delete(cell);
-    };   
+    }   
 
-    return ExpandableListView;
-}(common.ExpandableListView));
-exports.ExpandableListView = ExpandableListView;
+}
+
+Object.defineProperty(ExpandableListView.prototype, "ios", {
+    get: function () {
+        return this._ios;
+    },
+    enumerable: true,
+    configurable: true
+})
+
+Object.defineProperty(ExpandableListView.prototype, "_nativeView", {
+    get: function () {
+        return this._ios;
+    },
+    enumerable: true,
+    configurable: true
+})
+
+Object.defineProperty(ExpandableListView.prototype, "_childrenCount", {
+    get: function () {
+        return this.items.length;
+    },
+    enumerable: true,
+    configurable: true
+})
