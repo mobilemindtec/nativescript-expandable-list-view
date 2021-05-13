@@ -3,7 +3,7 @@ import {Builder} from "@nativescript/core/ui/builder";
 var view = require("@nativescript/core/ui/core/view");
 var label = require("@nativescript/core/ui/label");
 var color = require("@nativescript/core/color");
-var weakEvents = require("ui/core/weak-event-listener");
+var weakEvents = require("@nativescript/ui/core/weak-event-listener");
 var utils = require("@nativescript/core/utils");
 var ITEMS = "items";
 var ITEMHEADERTEMPLATE = "itemHeaderTemplate";
