@@ -7,7 +7,7 @@ var color;
 
 function ensureColor() {
     if (!color) {
-        color = require("color");
+        color = require("@nativescript/core/color");
     }
 }
 var CELLIDENTIFIER = "cell";
